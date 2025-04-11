@@ -25,16 +25,17 @@ class Tests(unittest.TestCase):
         num_cols = 3
         maze = Maze(0, 0, num_rows, num_cols, 10, 10)
         
-        # Before breaking walls, check that entrance and exit have walls
-        self.assertTrue(maze._cells[0][0].has_top_wall)
-        self.assertTrue(maze._cells[num_cols-1][num_rows-1].has_bottom_wall)
-        
-        # Call the method we're testing
-        maze._break_entrance_and_exit()
-        
         # After breaking walls, check that entrance and exit don't have walls
         self.assertFalse(maze._cells[0][0].has_top_wall)
         self.assertFalse(maze._cells[num_cols-1][num_rows-1].has_bottom_wall)
+
+    def test_maze_reset_cells_visited(self):
+        num_cols = 12
+        num_rows = 10
+        m1 = Maze(0, 0, num_rows, num_cols, 10, 10)
+        for col in m1._cells:
+            for cell in col:
+                self.assertEqual(cell._visited, False)
 
 if __name__ == "__main__":
     unittest.main()

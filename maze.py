@@ -19,6 +19,8 @@ class Maze:
         self._create_cells()
         self._break_entrance_and_exit()
         self._break_walls_r(0, 0)
+        self._reset_cells_visted()
+
 
     def _create_cells(self):
         self._cells = [[Cell(self._win) for row in range(self._num_rows)] for col in range(self._num_cols)]
@@ -86,3 +88,65 @@ class Maze:
             self._draw_cell(next_i, next_j)
 
             self._break_walls_r(next_i, next_j)
+        
+    def _reset_cells_visted(self):
+        for col in self._cells:
+            for cell in col:
+                cell._visited = False
+
+    def has_wall(self, j, i, direction):
+        if direction == (-1, 0):  # Up
+            return self._cells[j][i].has_top_wall
+        elif direction == (0, 1):  # Right
+            return self._cells[j][i].has_right_wall
+        elif direction == (1, 0):  # Down
+            return self._cells[j][i].has_bottom_wall
+        elif direction == (0, -1):  # Left
+            return self._cells[j][i].has_left_wall
+        return True  # Default: wall exists (safety)
+
+    def solve(self):
+        return self._solve_r(0, 0)
+
+    def _solve_r(self, j, i):
+        self._animate()
+        
+        self._cells[j][i]._visited = True
+        
+        # Check if we've reached the end
+        if j == self._num_cols - 1 and i == self._num_rows - 1:
+            return True
+        
+        # Define directions: Up, Right, Down, Left
+        directions = [(0, -1), (1, 0), (0, 1), (-1, 0)]
+        direction_names = ["up", "right", "down", "left"]
+        
+        for idx, (dj, di) in enumerate(directions):
+            new_j = j + dj
+            new_i = i + di
+            direction_name = direction_names[idx]
+            
+            # Check if the move is valid
+            if (0 <= new_i < self._num_rows and 0 <= new_j < self._num_cols and 
+                not self._cells[new_j][new_i]._visited):
+                
+                # Check for walls based on direction
+                has_wall = False
+                if direction_name == "up":
+                    has_wall = self._cells[j][i].has_top_wall
+                elif direction_name == "right":
+                    has_wall = self._cells[j][i].has_right_wall
+                elif direction_name == "down":
+                    has_wall = self._cells[j][i].has_bottom_wall
+                elif direction_name == "left":
+                    has_wall = self._cells[j][i].has_left_wall
+                
+                if not has_wall:
+                    self._cells[j][i].draw_move(self._cells[new_j][new_i])
+                    
+                    if self._solve_r(new_j, new_i):
+                        return True
+                    
+                    self._cells[j][i].draw_move(self._cells[new_j][new_i], True)
+        
+        return False
